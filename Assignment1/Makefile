@@ -19,4 +19,4 @@ clean:
 	rm -f ./output.txt
 
 run : $(TARGET)
-	./$(TARGET) ./input.txt 4 3 6 10 ./output.txt
+	./$(TARGET) ./input.txt 4 3 3 3 ./output.txt
