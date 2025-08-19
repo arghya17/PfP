@@ -85,7 +85,7 @@ void producer(int Lmin, int Lmax, int N, int buffer_size, const string &input_fi
     cout << "Producer thread finished producing lines from " << startline + 1 << " to " << endline << endl;
     cout << "Producers alive: " << producers_alive.load() << endl;
 }
-void consumer(int N, queue<string> &buffer, const string &output_file)
+void consumer(queue<string> &buffer, const string &output_file)
 {
 
     while (true)
@@ -123,20 +123,12 @@ void consumer(int N, queue<string> &buffer, const string &output_file)
         reader_lock.unlock(); // unlocking the reader lock so that other threads can read from the buffer
         unique_lock<mutex> file_lock(mtx_file_write);
         ofstream outfile(output_file, ios::app);
-        // append mode is used to write to the output file
         for (const string &l : lines_to_write)
         {
             outfile << l << endl;
         }
         outfile.close();
         file_lock.unlock();
-        // // unlocking the file lock so that other consumer threads can write to the file
-        // unique_lock<mutex> lx_counter(mtx_counter);
-        // if (counter >= N && lines_read.empty() && buffer.empty())
-        // {
-        //     lx_counter.unlock();
-        //     break;
-        // }
     }
 }
 int main(int argc, char *argv[])
@@ -147,12 +139,12 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    string input_file = argv[1];     // R
-    int num_threads = stoi(argv[2]); // T
-    int Lmin = stoi(argv[3]);        // Lmin
-    int Lmax = stoi(argv[4]);        // Lmax
-    int M = stoi(argv[5]);           // buffer size in lines
-    string output_file = argv[6];    // W
+    string input_file = argv[1];
+    int num_threads = stoi(argv[2]);
+    int Lmin = stoi(argv[3]);
+    int Lmax = stoi(argv[4]);
+    int M = stoi(argv[5]);
+    string output_file = argv[6];
 
     queue<string> buffer;
     buffer_size = M; // setting the global buffer size
@@ -164,7 +156,6 @@ int main(int argc, char *argv[])
     cout << "Buffer size (lines): " << buffer_size << endl;
     cout << "Output file: " << output_file << endl;
 
-    // counting the number of lines in the input file
     ifstream infile(input_file);
     int N = 0;
     string line;
@@ -181,20 +172,22 @@ int main(int argc, char *argv[])
     {
         cout << output_file << " not found" << endl;
     }
-    producers_alive = num_threads; // setting the number of producers alive
+    producers_alive = num_threads;
     vector<thread> x;
     vector<thread> y;
     for (int i = 0; i < num_threads; i++)
     {
         thread producer_thread(producer, Lmin, Lmax, N, buffer_size, input_file, ref(buffer));
-        // producer_thread.detach(); // detaching the producer thread
         x.push_back(move(producer_thread));
     }
-    int consumer_threads = num_threads / 2; // number of consumer threads can be same as producer threads
+    int consumer_threads = num_threads / 2;
+    if (consumer_threads <= 0)
+    {
+        consumer_threads = 1;
+    }
     for (int i = 0; i < consumer_threads; i++)
     {
-        thread consumer_thread(consumer, N, ref(buffer), output_file);
-        // consumer_thread.detach(); // detaching the consumer thread
+        thread consumer_thread(consumer, ref(buffer), output_file);
         y.push_back(move(consumer_thread));
     }
     for (thread &i : x)
