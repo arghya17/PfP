@@ -135,7 +135,7 @@ int main(int argc, char *argv[])
 {
     if (argc != 7)
     {
-        cerr << "Usage: " << argv[0] << " <input_file> <num_threads> <Lmin> <Lmax> <buffer_size in lines> <output_file>\n";
+        cout << "Usage: " << argv[0] << " <input_file> <num_threads> <Lmin> <Lmax> <buffer_size in lines> <output_file>\n";
         return 1;
     }
 
