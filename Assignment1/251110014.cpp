@@ -24,28 +24,20 @@ void producer(int Lmin, int Lmax, int N, int buffer_size, const string &input_fi
         {
             counter += L;
             endline = startline + L;
-            lock.unlock(); // pushing the number of lines read to the queue
+            lock.unlock();
         }
         else if (counter < N)
         {
             counter = N;
             endline = N;
-            lock.unlock(); // pushing the remaining lines to the queue
+            lock.unlock();
         }
         else
         {
             lock.unlock();
             break;
         }
-        // end of counter lock critical section
-
-        unique_lock<mutex> write_lock(mtx_write_complete);
-        cv_writer.wait(write_lock, []()
-                       { return !writer_active; }); // wait until no writer is active
-        writer_active = true;
-        // write_lock to serialize the producer in the case L is more than M the buffer size and consumer wakes up the wrong
-        //  producer thread to write to the buffer using mtx_buffer
-        ifstream infile(input_file);
+        ifstream infile(input_file); // outside critical section
         vector<string> lines;
         string line;
         int line_count = 0;
@@ -59,27 +51,28 @@ void producer(int Lmin, int Lmax, int N, int buffer_size, const string &input_fi
 
             lines.push_back(line);
         }
-        // write complete mutex takes care of the case when the line size is more than the buffersize
-        // so after reading from buffer other threads are not triggered when the current one is pending
+        unique_lock<mutex> write_lock(mtx_write_complete);
+        cv_writer.wait(write_lock, []()
+                       { return !writer_active; });
+        writer_active = true;
         unique_lock<mutex> buffer_lock(mtx_buffer);
         lines_read.push(endline - startline);
-        // buffer lock is used to wait for the buffer to be empty
+
         for (string l : lines)
         {
             cv_not_full.wait(buffer_lock, [&buffer, buffer_size]
                              { return buffer.size() < buffer_size; });
             buffer.push(l);
-            cv_not_empty.notify_one(); // notify that buffer is not empty
+            cv_not_empty.notify_one();
         }
         buffer_lock.unlock();
-        writer_active = false; // resetting the writer active flag
+        writer_active = false;
         cv_writer.notify_all();
-        write_lock.unlock(); // unlocking the write lock on the thread so others can take the buffer
-        // The write lock maintains the order of L write and
+        write_lock.unlock();
     }
     if (producers_alive.fetch_sub(1, memory_order_acq_rel) == 1)
     {
-        // last producer notifies to wake consumers so they can exit if no data
+
         cv_not_empty.notify_all();
     }
     cout << "Producer thread finished producing lines from " << startline + 1 << " to " << endline << endl;
@@ -92,7 +85,7 @@ void consumer(queue<string> &buffer, const string &output_file)
     {
         unique_lock<mutex> reader_lock(mtx_reader_active);
         cv_reader.wait(reader_lock, []()
-                       { return !reader_active; }); // wait until no reader is active
+                       { return !reader_active; });
         reader_active = true;
         unique_lock<mutex> lock(mtx_buffer);
         cv_not_empty.wait(lock, [&buffer]
@@ -118,9 +111,9 @@ void consumer(queue<string> &buffer, const string &output_file)
             cv_not_full.notify_one();
         }
         lock.unlock();
-        reader_active = false; // resetting the reader active flag
+        reader_active = false;
         cv_reader.notify_all();
-        reader_lock.unlock(); // unlocking the reader lock so that other threads can read from the buffer
+        reader_lock.unlock();
         unique_lock<mutex> file_lock(mtx_file_write);
         ofstream outfile(output_file, ios::app);
         for (const string &l : lines_to_write)
@@ -147,7 +140,7 @@ int main(int argc, char *argv[])
     string output_file = argv[6];
 
     queue<string> buffer;
-    buffer_size = M; // setting the global buffer size
+    buffer_size = M;
     cout << filesystem::current_path() << endl;
     cout << "Input file: " << input_file << endl;
     cout << "Number of producer threads: " << num_threads << endl;
