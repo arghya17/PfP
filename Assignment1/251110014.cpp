@@ -3,11 +3,13 @@ using namespace std;
 int counter = 0;
 atomic<int> producers_alive{0};
 mutex mtx_counter, mtx_buffer, mtx_write_complete, mtx_file_write, mtx_reader_active;
-condition_variable cv_not_full, cv_not_empty, cv_writer, cv_reader;
+condition_variable cv_not_full, cv_not_empty, cv_writer, cv_reader, cv_counter, cv_file_write;
 unsigned int buffer_size = 0;
 queue<int> lines_read;
 bool writer_active = false;
 bool reader_active = false;
+bool file_write_active = false;
+bool counter_active = false;
 void producer(int Lmin, int Lmax, int N, int buffer_size, const string &input_file, queue<string> &buffer)
 {
     random_device rd;
@@ -19,21 +21,30 @@ void producer(int Lmin, int Lmax, int N, int buffer_size, const string &input_fi
     {
         int L = dis(gen);
         unique_lock<mutex> lock(mtx_counter);
+        cv_counter.wait(lock, []()
+                        { return !counter_active; });
+        counter_active = true;
         startline = counter;
         if (counter + L <= N)
         {
             counter += L;
             endline = startline + L;
+            counter_active = false;
+            cv_counter.notify_all();
             lock.unlock();
         }
         else if (counter < N)
         {
             counter = N;
             endline = N;
+            counter_active = false;
+            cv_counter.notify_all();
             lock.unlock();
         }
         else
         {
+            counter_active = false;
+            cv_counter.notify_all();
             lock.unlock();
             break;
         }
@@ -104,7 +115,6 @@ void consumer(queue<string> &buffer, const string &output_file)
         {
             cv_not_empty.wait(lock, [&buffer]
                               { return !buffer.empty(); });
-            cout << "Consumer thread is consuming " << lines << " lines" << endl;
             string line = buffer.front();
             buffer.pop();
             lines_to_write.push_back(line);
@@ -114,13 +124,19 @@ void consumer(queue<string> &buffer, const string &output_file)
         reader_active = false;
         cv_reader.notify_all();
         reader_lock.unlock();
+        cout << "Consumer thread is consuming " << lines << " lines" << endl;
         unique_lock<mutex> file_lock(mtx_file_write);
+        cv_file_write.wait(file_lock, []()
+                           { return !file_write_active; });
+        file_write_active = true;
         ofstream outfile(output_file, ios::app);
         for (const string &l : lines_to_write)
         {
             outfile << l << endl;
         }
         outfile.close();
+        file_write_active = false;
+        cv_file_write.notify_all();
         file_lock.unlock();
     }
 }
