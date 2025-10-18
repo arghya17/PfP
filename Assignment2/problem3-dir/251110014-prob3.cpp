@@ -59,6 +59,27 @@ static inline bool cas32(volatile uint32_t *addr, uint32_t oldVal, uint32_t newV
       : "memory");
   return result;
 }
+static inline bool cas64(volatile uint64_t *addr, uint64_t oldVal, uint64_t newVal)
+{
+  unsigned char result;
+  asm volatile(
+      "lock cmpxchgq %3, %0 \n\t"
+      "sete %1"
+      : "+m"(*addr), "=q"(result), "+a"(oldVal) // oldVal in RAX
+      : "r"(newVal)
+      : "memory");
+  return result;
+}
+static inline uint64_t atomic_fetch_add(volatile uint64_t *addr, uint64_t inc)
+{
+  uint64_t oldVal, newVal;
+  do
+  {
+    oldVal = *addr;
+    newVal = oldVal + inc;
+  } while (!cas64(addr, oldVal, newVal));
+  return oldVal; // return old value, just like __atomic_fetch_add
+}
 /** Use pthread mutex to implement lock routines */
 class PthreadMutex : public LockBase
 {
@@ -104,7 +125,7 @@ public:
       {
         while (k != tid && levels[k].value >= level && victim[level].value == tid)
         {
-          asm volatile("" ::: "memory");
+          asm volatile("pause" ::: "memory");
           // busy wait
         }
       }
@@ -112,7 +133,7 @@ public:
   }
   void release(uint16_t tid) override
   {
-    asm volatile("mfence" ::: "memory");
+    asm volatile("" ::: "memory");
     levels[tid].value = 0;
   }
 
@@ -146,24 +167,26 @@ public:
       if (num > max)
         max = num;
     }
-    asm volatile("mfence" ::: "memory");
     label[tid].value = max + 1;
     asm volatile("mfence" ::: "memory");
     choosing[tid].value = false;
-    asm volatile("mfence" ::: "memory");
     for (int j = 0; j < NUM_THREADS; j++)
     {
       // Wait until thread j receives its label:
       while (choosing[j].value)
-        ;
+      {
+        asm volatile("pause" ::: "memory");
+      }
       // Wait until all threads with smaller labels or with the same label, but with higher priority, finish their work:
       while (label[j].value != 0 && (label[j].value < label[tid].value || (label[j].value == label[tid].value && j < tid)))
-        ;
+      {
+        asm volatile("pause" ::: "memory");
+      }
     }
   }
   void release(uint16_t tid) override
   {
-    asm volatile("mfence" ::: "memory");
+    asm volatile("" ::: "memory");
     label[tid].value = 0;
   }
   ~BakeryLock() {}
@@ -203,17 +226,17 @@ class TicketLock : public LockBase
 public:
   void acquire(uint16_t tid) override
   {
-    uint64_t my_ticket = __atomic_fetch_add(&next_ticket.value, 1, __ATOMIC_SEQ_CST);
+    uint64_t my_ticket = atomic_fetch_add(&next_ticket.value, 1);
     asm volatile("mfence" ::: "memory");
     while (now_serving.value != my_ticket)
     {
-      asm volatile("" ::: "memory");
+      asm volatile("pause" ::: "memory");
     }
   }
   void release(uint16_t tid) override
   {
-    asm volatile("mfence" ::: "memory");
-    __atomic_fetch_add(&now_serving.value, 1, __ATOMIC_SEQ_CST);
+    asm volatile("" ::: "memory");
+    atomic_fetch_add(&now_serving.value, 1);
   }
 
   TicketLock()
@@ -235,19 +258,19 @@ class ArrayQLock : public LockBase
 public:
   void acquire(uint16_t tid) override
   {
-    uint64_t slot = __atomic_fetch_add(&tail, 1, __ATOMIC_SEQ_CST) % size;
-    asm volatile("mfence" ::: "memory");
+    uint64_t slot = atomic_fetch_add(&tail, 1) % size;
+    asm volatile("" ::: "memory");
     my_slot = slot;
     asm volatile("mfence" ::: "memory");
     while (!flag[my_slot].value)
     {
-      asm volatile("mfence" ::: "memory");
+      asm volatile("pause" ::: "memory");
     }
   }
   void release(uint16_t tid) override
   {
     flag[my_slot].value = false;
-    asm volatile("mfence" ::: "memory");
+    asm volatile("" ::: "memory");
     flag[(my_slot + 1) % size].value = true;
   }
 

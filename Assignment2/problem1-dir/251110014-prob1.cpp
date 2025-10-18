@@ -170,6 +170,11 @@ int main(int argc, char *argv[])
         std::cerr << "Error adding PAPI_L1_DCH" << std::endl;
         return 1;
     }
+    if (PAPI_add_event(EventSet, PAPI_L3_TCM) != PAPI_OK)
+    { // L2 Data Cache Misses
+        std::cerr << "Error adding PAPI_L3_TCM" << std::endl;
+        return 1;
+    }
     // normal convolution
     {
         if (PAPI_start(EventSet) != PAPI_OK)
@@ -188,6 +193,7 @@ int main(int argc, char *argv[])
 
         cout << "L1 Data Cache Misses in Normal Convolution : " << values[0] << endl;
         cout << "L2 Data Cache Misses in Normal Convolution : " << values[1] << endl;
+        cout << "L3 Total Cache Misses in Normal Convolution : " << values[2] << endl;
         outfile << values[0] << "\t" << values[1] << "\t";
         // std::cout << "L1 Data Cache Hits in Normal Convolution :   " << values[1] << std::endl;
     }
@@ -213,6 +219,7 @@ int main(int argc, char *argv[])
         }
         cout << "L1 Data Cache Misses in blocked Convolution : " << values[0] << endl;
         cout << "L2 Data Cache Misses in blocked Convolution : " << values[1] << endl;
+        cout << "L3 Total Cache Misses in blocked Convolution : " << values[2] << endl;
         outfile << values[0] << "\t" << values[1] << "\t";
 
         PAPI_shutdown();
