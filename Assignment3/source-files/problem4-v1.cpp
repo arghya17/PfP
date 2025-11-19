@@ -36,18 +36,22 @@ double a[120];
 // to store values of grid.txt
 double b[30];
 
-int main() {
+int main()
+{
   int i, j;
 
   i = 0;
-  FILE* fp = fopen("./disp.txt", "r");
-  if (fp == NULL) {
+  FILE *fp = fopen("./disp.txt", "r");
+  if (fp == NULL)
+  {
     printf("Error: could not open file\n");
     return 1;
   }
 
-  while (!feof(fp)) {
-    if (!fscanf(fp, "%lf", &a[i])) {
+  while (!feof(fp))
+  {
+    if (!fscanf(fp, "%lf", &a[i]))
+    {
       printf("Error: fscanf failed while reading disp.txt\n");
       exit(EXIT_FAILURE);
     }
@@ -57,14 +61,17 @@ int main() {
 
   // read grid file
   j = 0;
-  FILE* fpq = fopen("./grid.txt", "r");
-  if (fpq == NULL) {
+  FILE *fpq = fopen("./grid.txt", "r");
+  if (fpq == NULL)
+  {
     printf("Error: could not open file\n");
     return 1;
   }
 
-  while (!feof(fpq)) {
-    if (!fscanf(fpq, "%lf", &b[j])) {
+  while (!feof(fpq))
+  {
+    if (!fscanf(fpq, "%lf", &b[j]))
+    {
       printf("Error: fscanf failed while reading grid.txt\n");
       exit(EXIT_FAILURE);
     }
@@ -119,7 +126,8 @@ void gridloopsearch(
     double ey8, double c91, double c92, double c93, double c94, double c95, double c96, double c97,
     double c98, double c99, double c910, double d9, double ey9, double c101, double c102,
     double c103, double c104, double c105, double c106, double c107, double c108, double c109,
-    double c1010, double d10, double ey10, double kk) {
+    double c1010, double d10, double ey10, double kk)
+{
   // results values
   double x1, x2, x3, x4, x5, x6, x7, x8, x9, x10;
 
@@ -133,8 +141,9 @@ void gridloopsearch(
   double e1, e2, e3, e4, e5, e6, e7, e8, e9, e10;
 
   // opening the "results-v0.txt" for writing he results in append mode
-  FILE* fptr = fopen("./results-v0.txt", "w");
-  if (fptr == NULL) {
+  FILE *fptr = fopen("./results-v0.txt", "w");
+  if (fptr == NULL)
+  {
     printf("Error in creating file !");
     exit(1);
   }
@@ -176,82 +185,169 @@ void gridloopsearch(
   s10 = floor((dd29 - dd28) / dd30);
 
   // grid search starts
-  for (int r1 = 0; r1 < s1; ++r1) {
+  for (int r1 = 0; r1 < s1; ++r1)
+  {
     x1 = dd1 + r1 * dd3;
+    double qr1, qr2, qr3, qr4, qr5, qr6, qr7, qr8, qr9, qr10;
+    qr1 = c11 * x1;
+    qr2 = c21 * x1;
+    qr3 = c31 * x1;
+    qr4 = c41 * x1;
+    qr5 = c51 * x1;
+    qr6 = c61 * x1;
+    qr7 = c71 * x1;
+    qr8 = c81 * x1;
+    qr9 = c91 * x1;
+    qr10 = c101 * x1;
 
-    for (int r2 = 0; r2 < s2; ++r2) {
+    for (int r2 = 0; r2 < s2; ++r2)
+    {
       x2 = dd4 + r2 * dd6;
+      double qr12, qr22, qr32, qr42, qr52, qr62, qr72, qr82, qr92, qr102;
+      qr12 = qr1 + c12 * x2;
+      qr22 = qr2 + c22 * x2;
+      qr32 = qr3 + c32 * x2;
+      qr42 = qr4 + c42 * x2;
+      qr52 = qr5 + c52 * x2;
+      qr62 = qr6 + c62 * x2;
+      qr72 = qr7 + c72 * x2;
+      qr82 = qr8 + c82 * x2;
+      qr92 = qr9 + c92 * x2;
+      qr102 = qr10 + c102 * x2;
 
-      for (int r3 = 0; r3 < s3; ++r3) {
+      for (int r3 = 0; r3 < s3; ++r3)
+      {
         x3 = dd7 + r3 * dd9;
+        double qr13, qr23, qr33, qr43, qr53, qr63, qr73, qr83, qr93, qr103;
+        qr13 = qr12 + c13 * x3;
+        qr23 = qr22 + c23 * x3;
+        qr33 = qr32 + c33 * x3;
+        qr43 = qr42 + c43 * x3;
+        qr53 = qr52 + c53 * x3;
+        qr63 = qr62 + c63 * x3;
+        qr73 = qr72 + c73 * x3;
+        qr83 = qr82 + c83 * x3;
+        qr93 = qr92 + c93 * x3;
+        qr103 = qr102 + c103 * x3;
 
-        for (int r4 = 0; r4 < s4; ++r4) {
+        for (int r4 = 0; r4 < s4; ++r4)
+        {
           x4 = dd10 + r4 * dd12;
+          double qr14, qr24, qr34, qr44, qr54, qr64, qr74, qr84, qr94, qr104;
+          qr14 = qr13 + c14 * x4;
+          qr24 = qr23 + c24 * x4;
+          qr34 = qr33 + c34 * x4;
+          qr44 = qr43 + c44 * x4;
+          qr54 = qr53 + c54 * x4;
+          qr64 = qr63 + c64 * x4;
+          qr74 = qr73 + c74 * x4;
+          qr84 = qr83 + c84 * x4;
+          qr94 = qr93 + c94 * x4;
+          qr104 = qr103 + c104 * x4;
 
-          for (int r5 = 0; r5 < s5; ++r5) {
+          for (int r5 = 0; r5 < s5; ++r5)
+          {
             x5 = dd13 + r5 * dd15;
+            double qr15, qr25, qr35, qr45, qr55, qr65, qr75, qr85, qr95, qr105;
+            qr15 = qr14 + c15 * x5;
+            qr25 = qr24 + c25 * x5;
+            qr35 = qr34 + c35 * x5;
+            qr45 = qr44 + c45 * x5;
+            qr55 = qr54 + c55 * x5;
+            qr65 = qr64 + c65 * x5;
+            qr75 = qr74 + c75 * x5;
+            qr85 = qr84 + c85 * x5;
+            qr95 = qr94 + c95 * x5;
+            qr105 = qr104 + c105 * x5;
 
-            for (int r6 = 0; r6 < s6; ++r6) {
+            for (int r6 = 0; r6 < s6; ++r6)
+            {
               x6 = dd16 + r6 * dd18;
+              double qr16, qr26, qr36, qr46, qr56, qr66, qr76, qr86, qr96, qr106;
+              qr16 = qr15 + c16 * x6;
+              qr26 = qr25 + c26 * x6;
+              qr36 = qr35 + c36 * x6;
+              qr46 = qr45 + c46 * x6;
+              qr56 = qr55 + c56 * x6;
+              qr66 = qr65 + c66 * x6;
+              qr76 = qr75 + c76 * x6;
+              qr86 = qr85 + c86 * x6;
+              qr96 = qr95 + c96 * x6;
+              qr106 = qr105 + c106 * x6;
 
-              for (int r7 = 0; r7 < s7; ++r7) {
+              for (int r7 = 0; r7 < s7; ++r7)
+              {
                 x7 = dd19 + r7 * dd21;
+                double qr17, qr27, qr37, qr47, qr57, qr67, qr77, qr87, qr97, qr107;
+                qr17 = qr16 + c17 * x7;
+                qr27 = qr26 + c27 * x7;
+                qr37 = qr36 + c37 * x7;
+                qr47 = qr46 + c47 * x7;
+                qr57 = qr56 + c57 * x7;
+                qr67 = qr66 + c67 * x7;
+                qr77 = qr76 + c77 * x7;
+                qr87 = qr86 + c87 * x7;
+                qr97 = qr96 + c97 * x7;
+                qr107 = qr106 + c107 * x7;
 
-                for (int r8 = 0; r8 < s8; ++r8) {
+                for (int r8 = 0; r8 < s8; ++r8)
+                {
                   x8 = dd22 + r8 * dd24;
-
-                  for (int r9 = 0; r9 < s9; ++r9) {
+                  double qr18, qr28, qr38, qr48, qr58, qr68, qr78, qr88, qr98, qr108;
+                  qr18 = qr17 + c18 * x8;
+                  qr28 = qr27 + c28 * x8;
+                  qr38 = qr37 + c38 * x8;
+                  qr48 = qr47 + c48 * x8;
+                  qr58 = qr57 + c58 * x8;
+                  qr68 = qr67 + c68 * x8;
+                  qr78 = qr77 + c78 * x8;
+                  qr88 = qr87 + c88 * x8;
+                  qr98 = qr97 + c98 * x8;
+                  qr108 = qr107 + c108 * x8;
+                  for (int r9 = 0; r9 < s9; ++r9)
+                  {
                     x9 = dd25 + r9 * dd27;
-
-                    for (int r10 = 0; r10 < s10; ++r10) {
+                    double qr19, qr29, qr39, qr49, qr59, qr69, qr79, qr89, qr99, qr109;
+                    qr19 = qr18 + c19 * x9;
+                    qr29 = qr28 + c29 * x9;
+                    qr39 = qr38 + c39 * x9;
+                    qr49 = qr48 + c49 * x9;
+                    qr59 = qr58 + c59 * x9;
+                    qr69 = qr68 + c69 * x9;
+                    qr79 = qr78 + c79 * x9;
+                    qr89 = qr88 + c89 * x9;
+                    qr99 = qr98 + c99 * x9;
+                    qr109 = qr108 + c109 * x9;
+                    for (int r10 = 0; r10 < s10; ++r10)
+                    {
                       x10 = dd28 + r10 * dd30;
 
                       // constraints
 
-                      q1 = fabs(c11 * x1 + c12 * x2 + c13 * x3 + c14 * x4 + c15 * x5 + c16 * x6 +
-                                c17 * x7 + c18 * x8 + c19 * x9 + c110 * x10 - d1);
+                      q1 = fabs(qr19 + c110 * x10 - d1);
 
-                      q2 = fabs(c21 * x1 + c22 * x2 + c23 * x3 + c24 * x4 + c25 * x5 + c26 * x6 +
-                                c27 * x7 + c28 * x8 + c29 * x9 + c210 * x10 - d2);
+                      q2 = fabs(qr29 + c210 * x10 - d2);
 
-                      q3 = fabs(c31 * x1 + c32 * x2 + c33 * x3 + c34 * x4 + c35 * x5 + c36 * x6 +
-                                c37 * x7 + c38 * x8 + c39 * x9 + c310 * x10 - d3);
+                      q3 = fabs(qr39 + c310 * x10 - d3);
+                      q4 = fabs(qr49 + c410 * x10 - d4);
+                      q5 = fabs(qr59 + c510 * x10 - d5);
+                      q6 = fabs(qr69 + c610 * x10 - d6);
 
-                      q4 = fabs(c41 * x1 + c42 * x2 + c43 * x3 + c44 * x4 + c45 * x5 + c46 * x6 +
-                                c47 * x7 + c48 * x8 + c49 * x9 + c410 * x10 - d4);
-                      q5 = fabs(c51 * x1 + c52 * x2 + c53 * x3 + c54 * x4 + c55 * x5 + c56 * x6 +
-                                c57 * x7 + c58 * x8 + c59 * x9 + c510 * x10 - d5);
+                      q7 = fabs(qr79 + c710 * x10 - d7);
 
-                      q6 = fabs(c61 * x1 + c62 * x2 + c63 * x3 + c64 * x4 + c65 * x5 + c66 * x6 +
-                                c67 * x7 + c68 * x8 + c69 * x9 + c610 * x10 - d6);
+                      q8 = fabs(qr89 + c810 * x10 - d8);
 
-                      q7 = fabs(c71 * x1 + c72 * x2 + c73 * x3 + c74 * x4 + c75 * x5 + c76 * x6 +
-                                c77 * x7 + c78 * x8 + c79 * x9 + c710 * x10 - d7);
+                      q9 = fabs(qr99 + c910 * x10 - d9);
 
-                      q8 = fabs(c81 * x1 + c82 * x2 + c83 * x3 + c84 * x4 + c85 * x5 + c86 * x6 +
-                                c87 * x7 + c88 * x8 + c89 * x9 + c810 * x10 - d8);
-
-                      q9 = fabs(c91 * x1 + c92 * x2 + c93 * x3 + c94 * x4 + c95 * x5 + c96 * x6 +
-                                c97 * x7 + c98 * x8 + c99 * x9 + c910 * x10 - d9);
-
-                      q10 = fabs(c101 * x1 + c102 * x2 + c103 * x3 + c104 * x4 + c105 * x5 +
-                                 c106 * x6 + c107 * x7 + c108 * x8 + c109 * x9 + c1010 * x10 - d10);
+                      q10 = fabs(qr109 + c1010 * x10 - d10);
 
                       if ((q1 <= e1) && (q2 <= e2) && (q3 <= e3) && (q4 <= e4) && (q5 <= e5) &&
-                          (q6 <= e6) && (q7 <= e7) && (q8 <= e8) && (q9 <= e9) && (q10 <= e10)) {
+                          (q6 <= e6) && (q7 <= e7) && (q8 <= e8) && (q9 <= e9) && (q10 <= e10))
+                      {
                         pnts = pnts + 1;
 
                         // xi's which satisfy the constraints to be written in file
-                        fprintf(fptr, "%lf\t", x1);
-                        fprintf(fptr, "%lf\t", x2);
-                        fprintf(fptr, "%lf\t", x3);
-                        fprintf(fptr, "%lf\t", x4);
-                        fprintf(fptr, "%lf\t", x5);
-                        fprintf(fptr, "%lf\t", x6);
-                        fprintf(fptr, "%lf\t", x7);
-                        fprintf(fptr, "%lf\t", x8);
-                        fprintf(fptr, "%lf\t", x9);
-                        fprintf(fptr, "%lf\n", x10);
+                        fprintf(fptr, "%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\n", x1, x2, x3, x4, x5, x6, x7, x8, x9, x10);
                       }
                     }
                   }
@@ -263,9 +359,7 @@ void gridloopsearch(
       }
     }
   }
-
   fclose(fptr);
   printf("result pnts: %ld\n", pnts);
-
   // end function gridloopsearch
 }
